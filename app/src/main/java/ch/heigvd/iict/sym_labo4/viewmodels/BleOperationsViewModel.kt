@@ -121,6 +121,19 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
                         Log.d(TAG, "isRequiredServiceSupported - TODO")
 
+                        if (mConnection != null && mConnection?.services != null) {
+                            Log.d(TAG, "Found ${mConnection!!.services.size} services")
+                            for(service in mConnection!!.services) {
+                                service.uuid
+                                Log.d(TAG,"===================")
+                                Log.d(TAG,service.uuid.toString())
+                                Log.d(TAG, "Found ${service.characteristics.size} characteristics")
+                                for(characteristic in service.characteristics){
+                                    Log.d(TAG,characteristic.uuid.toString())
+                                }
+                            }
+                        }
+
                         /* TODO
                         - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
                           bien tous les services et les caractéristiques attendues, on vérifiera aussi que les
@@ -129,7 +142,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
                           caractéristiques (déclarés en lignes 39 à 44)
                         */
 
-                        return false //FIXME si tout est OK, on retourne true, sinon la librairie appelera la méthode onDeviceDisconnected() avec le flag REASON_NOT_SUPPORTED
+                        return true //FIXME si tout est OK, on retourne true, sinon la librairie appelera la méthode onDeviceDisconnected() avec le flag REASON_NOT_SUPPORTED
                     }
 
                     override fun initialize() {
