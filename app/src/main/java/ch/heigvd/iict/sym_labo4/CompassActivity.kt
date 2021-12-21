@@ -62,16 +62,13 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
         accData = FloatArray(3)
         magnData = FloatArray(3)
         rotMatrix = FloatArray(16)
-
     }
 
     override fun onSensorChanged(event: SensorEvent) {
 
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            accData = event.values
-        }
-        else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
-            magnData = event.values
+        when (event.sensor.type) {
+            Sensor.TYPE_ACCELEROMETER  -> accData  = event.values
+            Sensor.TYPE_MAGNETIC_FIELD -> magnData = event.values
         }
 
         rotMatrix = opglr.swapRotMatrix(rotMatrix)
