@@ -32,7 +32,7 @@ import kotlin.collections.ArrayList
  * Updated by fabien.dutoit on 06.11.2020
  * (C) 2019 - HEIG-VD, IICT
  */
-class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
+class BleActivity : BaseTemplateActivity() {
     private val UUID = "3c0a1000-281d-4b48-b2a7-f15579a1c38f"
     //system services
     private lateinit var bluetoothAdapter: BluetoothAdapter
@@ -45,10 +45,6 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var scanPanel: View
     private lateinit var scanResults: ListView
     private lateinit var emptyScanResults: TextView
-
-    // gui actions panel
-    private lateinit var spinner: Spinner
-    private lateinit var fragDisplayer: FragmentContainerView
 
     //menu elements
     private var scanMenuBtn: MenuItem? = null
@@ -75,9 +71,6 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
         scanResults = findViewById(R.id.ble_scanresults)
         emptyScanResults = findViewById(R.id.ble_scanresults_empty)
 
-        spinner = findViewById(R.id.action_choice)
-        spinner.onItemSelectedListener = this
-
         findViewById<Button>(R.id.update_date_button).setOnClickListener {
             bleViewModel.updateDate(Calendar.getInstance())
         }
@@ -87,9 +80,6 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
         findViewById<Button>(R.id.send_integer_button).setOnClickListener {
             bleViewModel.sendInteger(Random().nextInt(100))
         }
-
-
-        // fragDisplayer = findViewById(R.id.fragment_displayer)
 
         //manage scanned item
         scanResultsAdapter = ResultsAdapter(this)
@@ -228,12 +218,4 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
     companion object {
         private val TAG = BleActivity::class.java.simpleName
     }
-
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        when(position) {
-            // 0 ->
-        }
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) { }
 }
