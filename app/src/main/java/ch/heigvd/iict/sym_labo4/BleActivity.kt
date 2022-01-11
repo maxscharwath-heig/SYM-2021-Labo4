@@ -7,7 +7,6 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -22,6 +21,9 @@ import androidx.lifecycle.ViewModelProvider
 import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
 import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
 import ch.heigvd.iict.sym_labo4.viewmodels.BleOperationsViewModel
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -76,6 +78,17 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
         spinner = findViewById(R.id.action_choice)
         spinner.onItemSelectedListener = this
 
+        findViewById<Button>(R.id.update_date_button).setOnClickListener {
+            bleViewModel.updateDate(Calendar.getInstance())
+        }
+        findViewById<Button>(R.id.get_temperature_button).setOnClickListener {
+            bleViewModel.readTemperature()
+        }
+        findViewById<Button>(R.id.send_integer_button).setOnClickListener {
+            bleViewModel.sendInteger(Random().nextInt(100))
+        }
+
+
         // fragDisplayer = findViewById(R.id.fragment_displayer)
 
         //manage scanned item
@@ -100,6 +113,19 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
 
         //ble events
         bleViewModel.isConnected.observe(this) { updateGui() }
+        bleViewModel.temperature.observe(this) {
+            val textView = findViewById<TextView>(R.id.temperature_data)
+            textView?.text = it.toString()
+        }
+        bleViewModel.currentTime.observe(this) {
+            val textView = findViewById<TextView>(R.id.time_data)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            textView?.text = dateFormat.format(it.time)
+        }
+        bleViewModel.buttonClicked.observe(this) {
+            val textView = findViewById<TextView>(R.id.btn_data)
+            textView?.text = it.toString()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -138,7 +164,6 @@ class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
     private fun updateGui() {
         val isConnected = bleViewModel.isConnected.value
         if (isConnected != null && isConnected) {
-
             scanPanel.visibility = View.GONE
             operationPanel.visibility = View.VISIBLE
 

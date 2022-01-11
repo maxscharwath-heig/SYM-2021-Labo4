@@ -23,7 +23,44 @@
                 android:id="@+id/action_choice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:entries="@array/ble_actions" />
+                android:entries="@array/ble_actions"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <TextView
+                android:id="@+id/temperature_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Temperature" />
+
+            <TextView
+                android:id="@+id/time_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Date" />
+
+            <TextView
+                android:id="@+id/btn_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Button" />
+
+            <Button
+                android:id="@+id/update_date_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Update Date" />
+
+            <Button
+                android:id="@+id/send_integer_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send random Integer" />
+
+            <Button
+                android:id="@+id/get_temperature_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Get Temperature" />
 
             <!--<androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragment_displayer"

@@ -15,7 +15,6 @@ import androidx.lifecycle.MutableLiveData
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.ble.observer.ConnectionObserver
-import java.nio.ByteBuffer
 import java.util.*
 
 /**
@@ -39,6 +38,9 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
     //live data - observer
     val isConnected = MutableLiveData(false)
+    val temperature = MutableLiveData(0.0)
+    val currentTime = MutableLiveData(Calendar.getInstance())
+    val buttonClicked = MutableLiveData(0)
 
     //Services and Characteristics of the SYM Pixl
     private var timeService: BluetoothGattService? = null
@@ -81,6 +83,20 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             false
         else
             ble.readTemperature()
+    }
+
+    fun sendInteger(value: Int):Boolean{
+        return if (!isConnected.value!! || integerChar == null)
+            false
+        else
+            ble.sendInteger(value)
+    }
+
+    fun updateDate(calendar: Calendar): Boolean {
+        return if (!isConnected.value!! || currentTimeChar == null)
+            false
+        else
+            ble.updateDate(calendar)
     }
 
     private val bleConnectionObserver: ConnectionObserver = object : ConnectionObserver {
@@ -158,24 +174,25 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
                             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
                          */
                         setNotificationCallback(buttonClickChar).with{_: BluetoothDevice, data: Data ->
-                            Log.d(TAG, "buttonClickChar - data: $data")
+                            val buttonClick = data.getIntValue(Data.FORMAT_UINT8, 0)
+                            buttonClicked.postValue(buttonClick)
+                            Log.d(TAG, "buttonClickChar - data: $buttonClick")
                         }
                         setNotificationCallback(currentTimeChar).with{_: BluetoothDevice, data: Data ->
-                            Log.d(TAG, "currentTimeChar - data: $data")
-                            val year = data.getIntValue(Data.FORMAT_UINT16, 0)
-                            val month = data.getIntValue(Data.FORMAT_UINT8, 2)
-                            val day = data.getIntValue(Data.FORMAT_UINT8, 3)
-                            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)
-                            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)
-                            val second = data.getIntValue(Data.FORMAT_UINT8, 6)
-                            //format date
-                            val date = String.format("%02d/%02d/%04d %02d:%02d:%02d", day, month, year, hour, minute, second)
+                            val year = data.getIntValue(Data.FORMAT_UINT16, 0)!!
+                            val month = data.getIntValue(Data.FORMAT_UINT8, 2)!!
+                            val day = data.getIntValue(Data.FORMAT_UINT8, 3)!!
+                            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)!!
+                            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)!!
+                            val second = data.getIntValue(Data.FORMAT_UINT8, 6)!!
+                            val date = Calendar.getInstance()
+                            date.set(year, month, day, hour, minute, second)
+                            currentTime.postValue(date)
                             Log.d(TAG, "currentTimeChar - date: $date")
                         }
 
                         enableNotifications(buttonClickChar!!).enqueue()
                         enableNotifications(currentTimeChar!!).enqueue()
-                        updateDate(Calendar.getInstance())
                     }
 
                     override fun onServicesInvalidated() {
@@ -193,23 +210,29 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
         }
 
         fun readTemperature(): Boolean {
-            /*  TODO
-                on peut effectuer ici la lecture de la caractéristique température
-                la valeur récupérée sera envoyée à l'activité en utilisant le mécanisme
-                des MutableLiveData
-                On placera des méthodes similaires pour les autres opérations
-            */
+            if(temperatureChar == null) {
+                return false
+            }
             readCharacteristic(temperatureChar!!).with{_: BluetoothDevice, data: Data ->
                 Log.d(TAG, "temperatureChar - data: $data")
-                val temperature = data.getIntValue(Data.FORMAT_SINT16, 0)
-                Log.d(TAG, "temperatureChar - temperature: $temperature")
+                val tempData = data.getIntValue(Data.FORMAT_UINT16, 0)?.div(10.0)
+                Log.d(TAG, "temperatureChar - tempData: $tempData")
+                temperature.postValue(tempData)
             }.enqueue()
-            return false //FIXME
+            return true
         }
 
-        fun updateDate(calendar: Calendar) {
+        fun sendInteger(value: Int):Boolean{
+            if(integerChar == null) {
+                return false
+            }
+            writeCharacteristic(integerChar!!, byteArrayOf(value.toByte()), WRITE_TYPE_DEFAULT).enqueue()
+            return true
+        }
+
+        fun updateDate(calendar: Calendar):Boolean {
             if(currentTimeChar == null){
-                return
+                return false
             }
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)+1
@@ -227,7 +250,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             bytes[5] = minutes.toByte()
             bytes[6] = seconds.toByte()
             writeCharacteristic(currentTimeChar!!, bytes, WRITE_TYPE_DEFAULT).enqueue()
-
+            return true
         }
     }
 
