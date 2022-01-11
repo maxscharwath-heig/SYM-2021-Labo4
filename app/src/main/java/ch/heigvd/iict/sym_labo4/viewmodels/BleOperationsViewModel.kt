@@ -1,5 +1,6 @@
 package ch.heigvd.iict.sym_labo4.viewmodels
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -11,8 +12,25 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import java.util.*
+
+data class DateTime(val year: Int, val month: Int, val day: Int, val hour: Int, val minute: Int, val second: Int){
+    companion object{
+        fun now():DateTime{
+            val calendar = Calendar.getInstance()
+            return DateTime(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                calendar.get(Calendar.SECOND)
+            )
+        }
+    }
+}
 
 /**
  * Project: Labo4
@@ -24,6 +42,14 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
     private var ble = SYMBleManager(application.applicationContext)
     private var mConnection: BluetoothGatt? = null
+
+    //UUID of the services and characteristics
+    private val TIME_SERVICE   = UUID.fromString("00001805-0000-1000-8000-00805f9b34fb")
+    private val CUSTOM_SERVICE = UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f")
+    private val INT_CHARACTERISTIC = UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f")
+    private val TEMPERATURE_CHARACTERISTIC = UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f")
+    private val BUTTON_CHARACTERISTIC = UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f")
+    private val CURRENT_TIME_CHARACTERISTIC = UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb")
 
     //live data - observer
     val isConnected = MutableLiveData(false)
@@ -52,6 +78,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun disconnect() {
         Log.d(TAG, "User request disconnection")
         ble.disconnect()
@@ -119,40 +146,50 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
                     public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
                         mConnection = gatt //trick to force disconnection
-
-                        Log.d(TAG, "isRequiredServiceSupported - TODO")
-
-                        if (mConnection != null && mConnection?.services != null) {
-                            Log.d(TAG, "Found ${mConnection!!.services.size} services")
-                            for(service in mConnection!!.services) {
-                                service.uuid
-                                Log.d(TAG,"===================")
-                                Log.d(TAG,service.uuid.toString())
-                                Log.d(TAG, "Found ${service.characteristics.size} characteristics")
-                                for(characteristic in service.characteristics){
-                                    Log.d(TAG,characteristic.uuid.toString())
-                                }
+                        //check if all required services and characteristics are available
+                        timeService = gatt.getService(TIME_SERVICE)
+                        symService = gatt.getService(CUSTOM_SERVICE)
+                        if (timeService != null && symService != null) {
+                            integerChar = symService!!.getCharacteristic(INT_CHARACTERISTIC)
+                            temperatureChar = symService!!.getCharacteristic(TEMPERATURE_CHARACTERISTIC)
+                            buttonClickChar = symService!!.getCharacteristic(BUTTON_CHARACTERISTIC)
+                            currentTimeChar = timeService!!.getCharacteristic(CURRENT_TIME_CHARACTERISTIC)
+                            if (integerChar != null && temperatureChar != null && buttonClickChar != null && currentTimeChar != null) {
+                                Log.d(TAG, "isRequiredServiceSupported - true")
+                                return true
                             }
                         }
-
-                        /* TODO
-                        - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
-                          bien tous les services et les caractéristiques attendues, on vérifiera aussi que les
-                          caractéristiques présentent bien les opérations attendues
-                        - On en profitera aussi pour garder les références vers les différents services et
-                          caractéristiques (déclarés en lignes 39 à 44)
-                        */
-
-                        return true //FIXME si tout est OK, on retourne true, sinon la librairie appelera la méthode onDeviceDisconnected() avec le flag REASON_NOT_SUPPORTED
+                        Log.d(TAG, "isRequiredServiceSupported - false")
+                        return false
                     }
 
                     override fun initialize() {
+                        Log.d(TAG, "initialize")
                         /*  TODO
                             Ici nous somme sûr que le périphérique possède bien tous les services et caractéristiques
                             attendus et que nous y sommes connectés. Nous pouvous effectuer les premiers échanges BLE:
                             Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
                             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
                          */
+                        setNotificationCallback(buttonClickChar).with{_: BluetoothDevice, data: Data ->
+                            Log.d(TAG, "buttonClickChar - data: $data")
+                        }
+                        setNotificationCallback(currentTimeChar).with{_: BluetoothDevice, data: Data ->
+                            Log.d(TAG, "currentTimeChar - data: $data")
+                            val year = data.getIntValue(Data.FORMAT_UINT16, 0)
+                            val month = data.getIntValue(Data.FORMAT_UINT8, 2)
+                            val day = data.getIntValue(Data.FORMAT_UINT8, 3)
+                            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)
+                            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)
+                            val second = data.getIntValue(Data.FORMAT_UINT8, 6)
+                            //format date
+                            val date = String.format("%02d/%02d/%04d %02d:%02d:%02d", day, month, year, hour, minute, second)
+                            Log.d(TAG, "currentTimeChar - date: $date")
+                        }
+
+                        enableNotifications(buttonClickChar!!).enqueue()
+                        enableNotifications(currentTimeChar!!).enqueue()
+                        updateDate(DateTime.now())
                     }
 
                     override fun onServicesInvalidated() {
@@ -176,7 +213,26 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
                 des MutableLiveData
                 On placera des méthodes similaires pour les autres opérations
             */
+            readCharacteristic(temperatureChar!!).with{_: BluetoothDevice, data: Data ->
+                Log.d(TAG, "temperatureChar - data: $data")
+                val temperature = data.getIntValue(Data.FORMAT_SINT16, 0)
+                Log.d(TAG, "temperatureChar - temperature: $temperature")
+            }.enqueue()
             return false //FIXME
+        }
+
+        fun updateDate(dateTime: DateTime){
+            if(currentTimeChar == null){
+                return
+            }
+            Log.d(TAG, "updateDate - dateTime: $dateTime")
+            currentTimeChar!!.setValue(dateTime.year, Data.FORMAT_UINT16, 0)
+            currentTimeChar!!.setValue(dateTime.month, Data.FORMAT_UINT8, 2)
+            currentTimeChar!!.setValue(dateTime.day, Data.FORMAT_UINT8, 3)
+            currentTimeChar!!.setValue(dateTime.hour, Data.FORMAT_UINT8, 4)
+            currentTimeChar!!.setValue(dateTime.minute, Data.FORMAT_UINT8, 5)
+            currentTimeChar!!.setValue(dateTime.second, Data.FORMAT_UINT8, 6)
+            writeCharacteristic(currentTimeChar!!, currentTimeChar!!.value).enqueue()
         }
     }
 
