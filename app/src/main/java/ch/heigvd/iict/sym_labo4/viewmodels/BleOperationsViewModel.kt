@@ -5,6 +5,7 @@ import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
@@ -14,23 +15,8 @@ import androidx.lifecycle.MutableLiveData
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.ble.observer.ConnectionObserver
+import java.nio.ByteBuffer
 import java.util.*
-
-data class DateTime(val year: Int, val month: Int, val day: Int, val hour: Int, val minute: Int, val second: Int){
-    companion object{
-        fun now():DateTime{
-            val calendar = Calendar.getInstance()
-            return DateTime(
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH),
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                calendar.get(Calendar.SECOND)
-            )
-        }
-    }
-}
 
 /**
  * Project: Labo4
@@ -91,10 +77,10 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
      */
 
     fun readTemperature(): Boolean {
-        if (!isConnected.value!! || temperatureChar == null)
-            return false
+        return if (!isConnected.value!! || temperatureChar == null)
+            false
         else
-            return ble.readTemperature()
+            ble.readTemperature()
     }
 
     private val bleConnectionObserver: ConnectionObserver = object : ConnectionObserver {
@@ -189,7 +175,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
                         enableNotifications(buttonClickChar!!).enqueue()
                         enableNotifications(currentTimeChar!!).enqueue()
-                        updateDate(DateTime.now())
+                        updateDate(Calendar.getInstance())
                     }
 
                     override fun onServicesInvalidated() {
@@ -221,18 +207,27 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             return false //FIXME
         }
 
-        fun updateDate(dateTime: DateTime){
+        fun updateDate(calendar: Calendar) {
             if(currentTimeChar == null){
                 return
             }
-            Log.d(TAG, "updateDate - dateTime: $dateTime")
-            currentTimeChar!!.setValue(dateTime.year, Data.FORMAT_UINT16, 0)
-            currentTimeChar!!.setValue(dateTime.month, Data.FORMAT_UINT8, 2)
-            currentTimeChar!!.setValue(dateTime.day, Data.FORMAT_UINT8, 3)
-            currentTimeChar!!.setValue(dateTime.hour, Data.FORMAT_UINT8, 4)
-            currentTimeChar!!.setValue(dateTime.minute, Data.FORMAT_UINT8, 5)
-            currentTimeChar!!.setValue(dateTime.second, Data.FORMAT_UINT8, 6)
-            writeCharacteristic(currentTimeChar!!, currentTimeChar!!.value).enqueue()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)+1
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+            val hours = calendar.get(Calendar.HOUR_OF_DAY)
+            val minutes = calendar.get(Calendar.MINUTE)
+            val seconds = calendar.get(Calendar.SECOND)
+
+            val bytes = ByteArray(10)
+            bytes[0] = (year and 0xFF).toByte()
+            bytes[1] = (year shr 8 and 0xFF).toByte()
+            bytes[2] = month.toByte()
+            bytes[3] = day.toByte()
+            bytes[4] = hours.toByte()
+            bytes[5] = minutes.toByte()
+            bytes[6] = seconds.toByte()
+            writeCharacteristic(currentTimeChar!!, bytes, WRITE_TYPE_DEFAULT).enqueue()
+
         }
     }
 
