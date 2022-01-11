@@ -1,20 +1,28 @@
 package ch.heigvd.iict.sym_labo4
 
-import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import ch.heigvd.iict.sym_labo4.viewmodels.BleOperationsViewModel
-import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
-import android.os.Bundle
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.*
-import androidx.lifecycle.ViewModelProvider
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.ParcelUuid
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ListView
+import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
+import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
+import ch.heigvd.iict.sym_labo4.viewmodels.BleOperationsViewModel
+
 
 /**
  * Project: Labo4
@@ -23,6 +31,7 @@ import android.widget.*
  * (C) 2019 - HEIG-VD, IICT
  */
 class BleActivity : BaseTemplateActivity() {
+    private val UUID = "3c0a1000-281d-4b48-b2a7-f15579a1c38f"
     //system services
     private lateinit var bluetoothAdapter: BluetoothAdapter
 
@@ -81,7 +90,7 @@ class BleActivity : BaseTemplateActivity() {
         }
 
         //ble events
-        bleViewModel.isConnected.observe(this, { updateGui() })
+        bleViewModel.isConnected.observe(this) { updateGui() }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -140,6 +149,7 @@ class BleActivity : BaseTemplateActivity() {
     }
 
     //this method needs user grant localisation and/or bluetooth permissions, our demo app is requesting them on MainActivity
+    @SuppressLint("MissingPermission")
     private fun scanLeDevice(enable: Boolean) {
         val bluetoothScanner = bluetoothAdapter.bluetoothLeScanner
 
@@ -149,10 +159,14 @@ class BleActivity : BaseTemplateActivity() {
             builderScanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             builderScanSettings.setReportDelay(0)
 
-            //we scan for any BLE device
-            //we don't filter them based on advertised services...
-            // TODO ajouter un filtre pour n'afficher que les devices proposant
-            // le service "SYM" (UUID: "3c0a1000-281d-4b48-b2a7-f15579a1c38f")
+            // Creation of filters list
+            val filters: ArrayList<ScanFilter> = ArrayList()
+
+            // Create filter from UUID string
+            val scanFilter =
+                ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(UUID)).build()
+            // Add the filter to the list
+            filters.add(scanFilter)
 
             //reset display
             scanResultsAdapter.clear()
