@@ -7,6 +7,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,9 +16,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
 import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
@@ -30,7 +30,7 @@ import ch.heigvd.iict.sym_labo4.viewmodels.BleOperationsViewModel
  * Updated by fabien.dutoit on 06.11.2020
  * (C) 2019 - HEIG-VD, IICT
  */
-class BleActivity : BaseTemplateActivity() {
+class BleActivity : BaseTemplateActivity(), AdapterView.OnItemSelectedListener {
     private val UUID = "3c0a1000-281d-4b48-b2a7-f15579a1c38f"
     //system services
     private lateinit var bluetoothAdapter: BluetoothAdapter
@@ -43,6 +43,10 @@ class BleActivity : BaseTemplateActivity() {
     private lateinit var scanPanel: View
     private lateinit var scanResults: ListView
     private lateinit var emptyScanResults: TextView
+
+    // gui actions panel
+    private lateinit var spinner: Spinner
+    private lateinit var fragDisplayer: FragmentContainerView
 
     //menu elements
     private var scanMenuBtn: MenuItem? = null
@@ -68,6 +72,11 @@ class BleActivity : BaseTemplateActivity() {
         scanPanel = findViewById(R.id.ble_scan)
         scanResults = findViewById(R.id.ble_scanresults)
         emptyScanResults = findViewById(R.id.ble_scanresults_empty)
+
+        spinner = findViewById(R.id.action_choice)
+        spinner.onItemSelectedListener = this
+
+        // fragDisplayer = findViewById(R.id.fragment_displayer)
 
         //manage scanned item
         scanResultsAdapter = ResultsAdapter(this)
@@ -194,4 +203,12 @@ class BleActivity : BaseTemplateActivity() {
     companion object {
         private val TAG = BleActivity::class.java.simpleName
     }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        when(position) {
+            // 0 ->
+        }
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) { }
 }

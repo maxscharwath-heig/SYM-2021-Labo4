@@ -19,6 +19,17 @@
 
             <!-- TODO vous placerez dans ce layout toutes les vues nécessaires aux intéractions avec le périphérique BLE -->
 
+            <Spinner
+                android:id="@+id/action_choice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/ble_actions" />
+
+            <!--<androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragment_displayer"
+                android:name="ch.heigvd.iict.sym_labo4.fragments.DisplayTemperatureFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />-->
         </LinearLayout>
 
     </ScrollView>
