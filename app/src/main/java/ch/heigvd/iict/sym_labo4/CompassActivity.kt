@@ -13,10 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import ch.heigvd.iict.sym_labo4.gl.OpenGLRenderer
 
 /**
- * Project: Labo4
- * Created by fabien.dutoit on 21.11.2016
- * Updated by fabien.dutoit on 06.11.2020
- * (C) 2016 - HEIG-VD, IICT
+ * Activity for compass using sensors
+ *
+ * @author Nicolas Crausaz
+ * @author Teo Ferrari
+ * @author Maxime Scharwath
  */
 class CompassActivity : AppCompatActivity(), SensorEventListener {
 
@@ -58,7 +59,7 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
         magnetometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-        // Init arrays
+        // Init sensors values arrays
         accData = FloatArray(3)
         magnData = FloatArray(3)
         rotMatrix = FloatArray(16)
@@ -66,11 +67,13 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
 
+        // Update sensors values
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER  -> accData  = event.values
             Sensor.TYPE_MAGNETIC_FIELD -> magnData = event.values
         }
 
+        // Generate & apply rotation matrix
         rotMatrix = opglr.swapRotMatrix(rotMatrix)
         SensorManager.getRotationMatrix(rotMatrix, null, accData, magnData);
     }
@@ -79,12 +82,14 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
+        // Register sensors
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause() {
         super.onPause()
+        // Unregister sensors
         sensorManager.unregisterListener(this)
     }
 }
