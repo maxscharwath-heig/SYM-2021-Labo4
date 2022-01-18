@@ -24,10 +24,13 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
     //opengl
     private lateinit var opglr: OpenGLRenderer
     private lateinit var m3DView: GLSurfaceView
+
+    // sensors
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometerSensor: Sensor
     private lateinit var magnetometerSensor: Sensor
 
+    // sensors data arrays
     private lateinit var accData: FloatArray
     private lateinit var magnData: FloatArray
     private lateinit var rotMatrix: FloatArray
@@ -66,7 +69,6 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-
         // Update sensors values
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER  -> accData  = event.values
@@ -74,10 +76,10 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
         }
 
         // Generate & apply rotation matrix
-        rotMatrix = opglr.swapRotMatrix(rotMatrix)
-        SensorManager.getRotationMatrix(rotMatrix, null, accData, magnData);
+        SensorManager.getRotationMatrix(opglr.swapRotMatrix(rotMatrix), null, accData, magnData)
     }
 
+    // Not used
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
 
     override fun onResume() {
