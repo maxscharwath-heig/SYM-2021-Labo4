@@ -24,9 +24,9 @@
     <string name="ble_send_hour">Mise à jour de l\'heure</string>
     <string name="ble_get_temp">Récupérer la température</string>
 
-    <string name="ble_label_temp">Température:</string>
-    <string name="ble_label_count">Bouton:</string>
-    <string name="ble_label_date">Date:</string>
+    <string name="ble_label_temp">Température: %1$s</string>
+    <string name="ble_label_count">Bouton: %1$s</string>
+    <string name="ble_label_date">Date: %1$s</string>
 
 
 </resources>
