@@ -183,17 +183,14 @@ class BleActivity : BaseTemplateActivity() {
             builderScanSettings.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             builderScanSettings.setReportDelay(0)
 
-            // Creation of filters list
-            val filters: ArrayList<ScanFilter> = ArrayList()
-
-            // Create filter from UUID string
-            val scanFilter =
-                ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(UUID)).build()
-            // Add the filter to the list
-            filters.add(scanFilter)
+            //try this but it doesn't work
+            val filters = ArrayList<ScanFilter>()
+            val serviceFilter = ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(UUID)).build()
+            filters.add(serviceFilter)
 
             //reset display
             scanResultsAdapter.clear()
+            // filters is null because it doesn't work for now, but i filter by service UUID in callback.
             bluetoothScanner.startScan(null, builderScanSettings.build(), leScanCallback)
             Log.d(TAG, "Start scanning...")
             isScanning = true
@@ -211,6 +208,8 @@ class BleActivity : BaseTemplateActivity() {
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
+            //check if device has the service we are looking for
+            if (result.scanRecord?.serviceUuids?.contains(ParcelUuid.fromString(UUID)) != true) return
             runOnUiThread { scanResultsAdapter.addDevice(result) }
         }
     }
