@@ -18,4 +18,15 @@
     <string name="ble_sendvalue_title">Envoi de valeur</string>
     <string name="ble_sendvalue_send">Send</string>
 
+    <string name="ble_title_device_section1">Informations périphérique</string>
+    <string name="ble_title_device_section2">Actions</string>
+    <string name="ble_send_int">Envoi d\'un nombre aléatoire</string>
+    <string name="ble_send_hour">Mise à jour de l\'heure</string>
+    <string name="ble_get_temp">Récupérer la température</string>
+
+    <string name="ble_label_temp">Température: %1$s</string>
+    <string name="ble_label_count">Bouton: %1$s</string>
+    <string name="ble_label_date">Date: %1$s</string>
+
+
 </resources>

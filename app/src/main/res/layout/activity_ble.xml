@@ -10,15 +10,84 @@
         android:id="@+id/ble_operation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible" >
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- TODO vous placerez dans ce layout toutes les vues nécessaires aux intéractions avec le périphérique BLE -->
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="64dp" />
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="321dp"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_title_device_section1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+            <TextView
+                android:id="@+id/temperature_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_label_temp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+            <TextView
+                android:id="@+id/time_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_label_date" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+            <TextView
+                android:id="@+id/btn_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_label_count" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="20dp" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_title_device_section2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <Button
+                android:id="@+id/update_date_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_send_hour" />
+
+            <Button
+                android:id="@+id/send_integer_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_send_int" />
+
+            <Button
+                android:id="@+id/get_temperature_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ble_get_temp" />
         </LinearLayout>
 
     </ScrollView>
@@ -38,9 +107,9 @@
             android:id="@+id/ble_scanresults_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ble_empty"
             android:layout_centerInParent="true"
-            android:gravity="center" />
+            android:gravity="center"
+            android:text="@string/ble_empty" />
 
     </RelativeLayout>
 
