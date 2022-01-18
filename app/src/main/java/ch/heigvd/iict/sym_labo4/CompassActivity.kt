@@ -67,6 +67,30 @@ class CompassActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
 
+        when (event.sensor.type) {
+            Sensor.TYPE_ACCELEROMETER  -> accData  = event.values
+            Sensor.TYPE_MAGNETIC_FIELD -> magnData = event.values
+        }
+
+        rotMatrix = opglr.swapRotMatrix(rotMatrix)
+        SensorManager.getRotationMatrix(rotMatrix, null, accData, magnData);
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
+
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+
         // Update sensors values
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER  -> accData  = event.values
