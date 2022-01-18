@@ -105,16 +105,16 @@ class BleActivity : BaseTemplateActivity() {
         bleViewModel.isConnected.observe(this) { updateGui() }
         bleViewModel.temperature.observe(this) {
             val textView = findViewById<TextView>(R.id.temperature_data)
-            textView?.text = it.toString()
+            textView?.text = getString(R.string.ble_label_temp, it.toString())
         }
         bleViewModel.currentTime.observe(this) {
             val textView = findViewById<TextView>(R.id.time_data)
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            textView?.text = dateFormat.format(it.time)
+            textView?.text = getString(R.string.ble_label_date, dateFormat.format(it.time))
         }
         bleViewModel.buttonClicked.observe(this) {
             val textView = findViewById<TextView>(R.id.btn_data)
-            textView?.text = it.toString()
+            textView?.text = getString(R.string.ble_label_count, it.toString())
         }
     }
 

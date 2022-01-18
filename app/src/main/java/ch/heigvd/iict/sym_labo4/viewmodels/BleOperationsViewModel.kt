@@ -73,11 +73,6 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
         mConnection?.disconnect()
     }
 
-    /* TODO
-        vous pouvez placer ici les différentes méthodes permettant à l'utilisateur
-        d'interagir avec le périphérique depuis l'activité
-     */
-
     fun readTemperature(): Boolean {
         return if (!isConnected.value!! || temperatureChar == null)
             false
@@ -167,12 +162,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
                     override fun initialize() {
                         Log.d(TAG, "initialize")
-                        /*  TODO
-                            Ici nous somme sûr que le périphérique possède bien tous les services et caractéristiques
-                            attendus et que nous y sommes connectés. Nous pouvous effectuer les premiers échanges BLE:
-                            Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
-                            caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
-                         */
+
                         setNotificationCallback(buttonClickChar).with{_: BluetoothDevice, data: Data ->
                             val buttonClick = data.getIntValue(Data.FORMAT_UINT8, 0)
                             buttonClicked.postValue(buttonClick)
