@@ -173,7 +173,6 @@ class BleActivity : BaseTemplateActivity() {
     }
 
     //this method needs user grant localisation and/or bluetooth permissions, our demo app is requesting them on MainActivity
-    @SuppressLint("MissingPermission")
     private fun scanLeDevice(enable: Boolean) {
         val bluetoothScanner = bluetoothAdapter.bluetoothLeScanner
 

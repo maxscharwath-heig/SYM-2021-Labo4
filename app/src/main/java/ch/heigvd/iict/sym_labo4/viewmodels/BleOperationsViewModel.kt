@@ -66,7 +66,6 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    @SuppressLint("MissingPermission")
     fun disconnect() {
         Log.d(TAG, "User request disconnection")
         ble.disconnect()
