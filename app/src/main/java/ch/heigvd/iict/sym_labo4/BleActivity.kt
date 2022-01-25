@@ -1,6 +1,5 @@
 package ch.heigvd.iict.sym_labo4
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
@@ -16,7 +15,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
 import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
@@ -27,10 +25,11 @@ import kotlin.collections.ArrayList
 
 
 /**
- * Project: Labo4
- * Created by fabien.dutoit on 11.05.2019
- * Updated by fabien.dutoit on 06.11.2020
- * (C) 2019 - HEIG-VD, IICT
+ * Activity for connecting & using BLE devices
+ *
+ * @author Nicolas Crausaz
+ * @author Teo Ferrari
+ * @author Maxime Scharwath
  */
 class BleActivity : BaseTemplateActivity() {
     private val UUID = "3c0a1000-281d-4b48-b2a7-f15579a1c38f"
