@@ -1,5 +1,6 @@
 package ch.heigvd.iict.sym_labo4.viewmodels
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
@@ -8,8 +9,10 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
 import android.bluetooth.BluetoothGattService
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import no.nordicsemi.android.ble.BleManager
@@ -21,7 +24,10 @@ import java.util.*
  * Project: Labo4
  * Created by fabien.dutoit on 11.05.2019
  * Updated by fabien.dutoit on 18.10.2021
- * (C) 2019 - HEIG-VD, IICT
+ * @author Nicolas Crausaz
+ * @author Teo Ferrari
+ * @author Maxime Scharwath
+ * (C) 2022 - HEIG-VD, IICT
  */
 class BleOperationsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -160,7 +166,12 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
                     }
 
                     override fun initialize() {
-                        Log.d(TAG, "initialize")
+                        Log.d(TAG, "start initialize")
+
+                        if(buttonClickChar == null || currentTimeChar == null) {
+                            Log.d(TAG, "failed to initialize, buttonClickChar or currentTimeChar is null")
+                            return
+                        }
 
                         setNotificationCallback(buttonClickChar).with{_: BluetoothDevice, data: Data ->
                             val buttonClick = data.getIntValue(Data.FORMAT_UINT8, 0)
@@ -168,20 +179,23 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
                             Log.d(TAG, "buttonClickChar - data: $buttonClick")
                         }
                         setNotificationCallback(currentTimeChar).with{_: BluetoothDevice, data: Data ->
-                            val year = data.getIntValue(Data.FORMAT_UINT16, 0)!!
-                            val month = data.getIntValue(Data.FORMAT_UINT8, 2)!!
-                            val day = data.getIntValue(Data.FORMAT_UINT8, 3)!!
-                            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)!!
-                            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)!!
-                            val second = data.getIntValue(Data.FORMAT_UINT8, 6)!!
+                            val year = data.getIntValue(Data.FORMAT_UINT16, 0)
+                            val month = data.getIntValue(Data.FORMAT_UINT8, 2)
+                            val day = data.getIntValue(Data.FORMAT_UINT8, 3)
+                            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)
+                            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)
+                            val second = data.getIntValue(Data.FORMAT_UINT8, 6)
+                            if(year == null || month == null || day == null || hour == null || minute == null || second == null) {
+                                Log.d(TAG, "Error reading current time");
+                                return@with
+                            }
                             val date = Calendar.getInstance()
                             date.set(year, month, day, hour, minute, second)
                             currentTime.postValue(date)
-                            Log.d(TAG, "currentTimeChar - date: $date")
                         }
 
-                        enableNotifications(buttonClickChar!!).enqueue()
-                        enableNotifications(currentTimeChar!!).enqueue()
+                        enableNotifications(buttonClickChar).enqueue()
+                        enableNotifications(currentTimeChar).enqueue()
                     }
 
                     override fun onServicesInvalidated() {
@@ -202,7 +216,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             if(temperatureChar == null) {
                 return false
             }
-            readCharacteristic(temperatureChar!!).with{_: BluetoothDevice, data: Data ->
+            readCharacteristic(temperatureChar).with{_: BluetoothDevice, data: Data ->
                 Log.d(TAG, "temperatureChar - data: $data")
                 val tempData = data.getIntValue(Data.FORMAT_UINT16, 0)?.div(10.0)
                 Log.d(TAG, "temperatureChar - tempData: $tempData")
@@ -215,7 +229,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             if(integerChar == null) {
                 return false
             }
-            writeCharacteristic(integerChar!!, byteArrayOf(value.toByte()), WRITE_TYPE_DEFAULT).enqueue()
+            writeCharacteristic(integerChar, byteArrayOf(value.toByte()), WRITE_TYPE_DEFAULT).enqueue()
             return true
         }
 
@@ -238,7 +252,7 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
             bytes[4] = hours.toByte()
             bytes[5] = minutes.toByte()
             bytes[6] = seconds.toByte()
-            writeCharacteristic(currentTimeChar!!, bytes, WRITE_TYPE_DEFAULT).enqueue()
+            writeCharacteristic(currentTimeChar, bytes, WRITE_TYPE_DEFAULT).enqueue()
             return true
         }
     }

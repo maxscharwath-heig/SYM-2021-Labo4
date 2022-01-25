@@ -13,11 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import ch.heigvd.iict.sym_labo4.gl.OpenGLRenderer
 
 /**
+ * Project: Labo4
  * Activity for compass using sensors
  *
  * @author Nicolas Crausaz
  * @author Teo Ferrari
  * @author Maxime Scharwath
+ * (C) 2022 - HEIG-VD, IICT
  */
 class CompassActivity : AppCompatActivity(), SensorEventListener {
 

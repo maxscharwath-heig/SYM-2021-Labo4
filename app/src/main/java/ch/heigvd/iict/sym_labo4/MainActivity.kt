@@ -12,7 +12,10 @@ import permissions.dispatcher.NeedsPermission
  * Project: Labo4
  * Created by fabien.dutoit on 21.11.2016
  * Updated by fabien.dutoit on 06.11.2020
- * (C) 2016 - HEIG-VD, IICT
+ * @author Nicolas Crausaz
+ * @author Teo Ferrari
+ * @author Maxime Scharwath
+ * (C) 2022 - HEIG-VD, IICT
  */
 @RuntimePermissions
 class MainActivity : AppCompatActivity() {

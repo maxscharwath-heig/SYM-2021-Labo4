@@ -35,7 +35,7 @@ class ResultsAdapter(private val context: Context) : BaseAdapter() {
         }
         if (!alreadyInAdapter) {
             results.add(newResult)
-            results.sortWith{ o1: ScanResult, o2: ScanResult -> o1.rssi - o2.rssi }
+            results.sortWith{ o1: ScanResult, o2: ScanResult -> o2.rssi - o1.rssi }
             notifyDataSetChanged()
         }
     }

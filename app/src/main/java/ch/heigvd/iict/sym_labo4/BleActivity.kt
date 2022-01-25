@@ -1,11 +1,13 @@
 package ch.heigvd.iict.sym_labo4
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +17,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import ch.heigvd.iict.sym_labo4.abstractactivies.BaseTemplateActivity
 import ch.heigvd.iict.sym_labo4.adapters.ResultsAdapter
@@ -25,11 +28,13 @@ import kotlin.collections.ArrayList
 
 
 /**
+ * Project: Labo4
  * Activity for connecting & using BLE devices
  *
  * @author Nicolas Crausaz
  * @author Teo Ferrari
  * @author Maxime Scharwath
+ * (C) 2022 - HEIG-VD, IICT
  */
 class BleActivity : BaseTemplateActivity() {
     private val UUID = "3c0a1000-281d-4b48-b2a7-f15579a1c38f"
@@ -44,6 +49,7 @@ class BleActivity : BaseTemplateActivity() {
     private lateinit var scanPanel: View
     private lateinit var scanResults: ListView
     private lateinit var emptyScanResults: TextView
+    private lateinit var progressScanning: ProgressBar
 
     //menu elements
     private var scanMenuBtn: MenuItem? = null
@@ -69,6 +75,7 @@ class BleActivity : BaseTemplateActivity() {
         scanPanel = findViewById(R.id.ble_scan)
         scanResults = findViewById(R.id.ble_scanresults)
         emptyScanResults = findViewById(R.id.ble_scanresults_empty)
+        progressScanning = findViewById(R.id.ble_scanning)
 
         findViewById<Button>(R.id.update_date_button).setOnClickListener {
             bleViewModel.updateDate(Calendar.getInstance())
@@ -188,9 +195,10 @@ class BleActivity : BaseTemplateActivity() {
 
             //reset display
             scanResultsAdapter.clear()
-            // filters is null because it doesn't work for now, but i filter by service UUID in callback.
+            // filters is null but the filtering is in leScanCallback.
             bluetoothScanner.startScan(null, builderScanSettings.build(), leScanCallback)
             Log.d(TAG, "Start scanning...")
+            progressScanning.visibility = View.VISIBLE
             isScanning = true
 
             //we scan only for 15 seconds
@@ -198,6 +206,7 @@ class BleActivity : BaseTemplateActivity() {
         } else {
             bluetoothScanner.stopScan(leScanCallback)
             isScanning = false
+            progressScanning.visibility = View.GONE
             Log.d(TAG, "Stop scanning (manual)")
         }
     }

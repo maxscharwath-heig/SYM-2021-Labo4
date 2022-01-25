@@ -101,15 +101,31 @@
             android:id="@+id/ble_scanresults"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical" >
 
-        <TextView
-            android:id="@+id/ble_scanresults_empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+        </ListView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@string/ble_empty" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/ble_scanresults_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/ble_empty"
+                android:textColor="#455A64" />
+
+            <ProgressBar
+                android:id="@+id/ble_scanning"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+        </LinearLayout>
 
     </RelativeLayout>
 
