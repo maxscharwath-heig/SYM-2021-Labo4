@@ -200,6 +200,16 @@ class BleOperationsViewModel(application: Application) : AndroidViewModel(applic
 
                     override fun onServicesInvalidated() {
                         //we reset services and characteristics
+                        if(buttonClickChar!= null) {
+                            disableNotifications(buttonClickChar).enqueue()
+                        }
+                        if(currentTimeChar!= null) {
+                            disableNotifications(currentTimeChar).enqueue()
+                        }
+                        temperature.postValue(0.0)
+                        currentTime.postValue(Calendar.getInstance())
+                        buttonClicked.postValue(0)
+
                         timeService = null
                         currentTimeChar = null
                         symService = null
